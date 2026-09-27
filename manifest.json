@@ -1,0 +1,77 @@
+{
+  "id": "hero-header",
+  "name": "Hero Header",
+  "version": "1.0.0",
+  "description": "Big time, date and greeting with today's weather and the next event — one card for the top of a screen.",
+  "author": "Tanya",
+  "license": "MIT",
+  "minAppVersion": "1.7.1",
+  "moduleType": "hero-header",
+  "category": "Time & Date",
+  "icon": "Clock",
+  "defaultConfig": {
+    "name": "",
+    "personName": "",
+    "showWeather": true,
+    "showNext": true,
+    "accentColor": "#b45309"
+  },
+  "defaultSize": {
+    "w": 1000,
+    "h": 340
+  },
+  "defaultStyle": {
+    "fontSize": 18,
+    "padding": 28,
+    "borderRadius": 28
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "title": "Greeting name",
+        "ui:widget": "text",
+        "ui:group": "Content",
+        "description": "e.g. Nora. Empty = just 'Good morning'."
+      },
+      "personName": {
+        "type": "string",
+        "title": "Next event from",
+        "ui:widget": "text",
+        "ui:group": "Content",
+        "description": "A person from Settings → Calendar → People. Empty = everyone."
+      },
+      "showWeather": {
+        "type": "boolean",
+        "title": "Show weather",
+        "ui:widget": "toggle",
+        "ui:group": "Content"
+      },
+      "showNext": {
+        "type": "boolean",
+        "title": "Show next event",
+        "ui:widget": "toggle",
+        "ui:group": "Content"
+      },
+      "accentColor": {
+        "type": "string",
+        "title": "Accent colour",
+        "ui:widget": "color",
+        "ui:group": "Look"
+      }
+    }
+  },
+  "exports": {
+    "component": "default"
+  },
+  "dataRequirements": [
+    "calendar",
+    "weather",
+    "location"
+  ],
+  "prefetchUrl": null,
+  "permissions": [
+    "storage"
+  ]
+}
