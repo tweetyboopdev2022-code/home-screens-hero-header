@@ -1,8 +1,8 @@
 {
   "id": "hero-header",
   "name": "Hero Header",
-  "version": "1.0.0",
-  "description": "Big time, date and greeting with today's weather and the next event — one card for the top of a screen.",
+  "version": "1.1.0",
+  "description": "Big time, date and greeting with today's weather and the next event \u2014 one card for the top of a screen.",
   "author": "Tanya",
   "license": "MIT",
   "minAppVersion": "1.7.1",
@@ -14,7 +14,8 @@
     "personName": "",
     "showWeather": true,
     "showNext": true,
-    "accentColor": "#b45309"
+    "accentColor": "#b45309",
+    "layout": "auto"
   },
   "defaultSize": {
     "w": 1000,
@@ -40,7 +41,7 @@
         "title": "Next event from",
         "ui:widget": "text",
         "ui:group": "Content",
-        "description": "A person from Settings → Calendar → People. Empty = everyone."
+        "description": "A person from Settings \u2192 Calendar \u2192 People. Empty = everyone."
       },
       "showWeather": {
         "type": "boolean",
@@ -59,6 +60,23 @@
         "title": "Accent colour",
         "ui:widget": "color",
         "ui:group": "Look"
+      },
+      "layout": {
+        "type": "string",
+        "title": "Layout",
+        "enum": [
+          "auto",
+          "tall",
+          "slim"
+        ],
+        "ui:widget": "select",
+        "ui:group": "Look",
+        "description": "Auto goes slim (one band) when the block is short.",
+        "enumLabels": [
+          "Auto",
+          "Tall",
+          "Slim"
+        ]
       }
     }
   },
