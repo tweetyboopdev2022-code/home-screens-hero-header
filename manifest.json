@@ -1,8 +1,8 @@
 {
   "id": "hero-header",
   "name": "Hero Header",
-  "version": "1.1.0",
-  "description": "Big time, date and greeting with today's weather and the next event \u2014 one card for the top of a screen.",
+  "version": "1.2.0",
+  "description": "Big time, date and greeting with today's weather and the next event — one card for the top of a screen.",
   "author": "Tanya",
   "license": "MIT",
   "minAppVersion": "1.7.1",
@@ -13,6 +13,7 @@
     "name": "",
     "personName": "",
     "showWeather": true,
+    "weatherPopup": true,
     "showNext": true,
     "accentColor": "#b45309",
     "layout": "auto"
@@ -41,13 +42,20 @@
         "title": "Next event from",
         "ui:widget": "text",
         "ui:group": "Content",
-        "description": "A person from Settings \u2192 Calendar \u2192 People. Empty = everyone."
+        "description": "A person from Settings → Calendar → People. Empty = everyone."
       },
       "showWeather": {
         "type": "boolean",
         "title": "Show weather",
         "ui:widget": "toggle",
         "ui:group": "Content"
+      },
+      "weatherPopup": {
+        "type": "boolean",
+        "title": "Tap weather for forecast",
+        "ui:widget": "toggle",
+        "ui:group": "Content",
+        "description": "Tapping the weather opens the next 24 hours and the week ahead."
       },
       "showNext": {
         "type": "boolean",
