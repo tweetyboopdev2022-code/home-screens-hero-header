@@ -31,7 +31,7 @@ export function Overlay({ children, onClose, style }: { children: React.ReactNod
 
 const pct = (p?: number) => (typeof p === 'number' && p >= 20 ? `${Math.round(p / 10) * 10}%` : '');
 
-/** Next 24 hours (6 × 4 grid, no scrolling on the touch screen) and the next days, with a low–high bar. */
+/** Next 24 hours (one timeline row every 3 hours, no scrolling on the touch screen) and the next days, with a low–high bar. */
 export function WeatherPopup({ hourly, forecast, now, tz, tf, deg, accent, style, onClose }: {
   hourly: Hour[]; forecast: Day[]; now: Date; tz?: string; tf?: string; deg: string; accent: string; style: any; onClose: () => void;
 }) {
@@ -54,22 +54,7 @@ export function WeatherPopup({ hourly, forecast, now, tz, tf, deg, accent, style
         <button onClick={onClose} aria-label="Close" style={{ appearance: 'none', border: 'none', font: 'inherit', color: 'inherit', cursor: 'pointer', background: ink(style, 0.08), borderRadius: '999px', width: '1.8em', height: '1.8em', flexShrink: 0 }}>✕</button>
       </div>
 
-      {hrs.length > 0 && <>
-        <div style={caps}>Next {hrs.length} hours</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '0.35em', marginBottom: '1em' }}>
-          {hrs.map((x, i) => {
-            const d = new Date(x.time); const h = hourOf(d); const p = pct(x.precipProbability);
-            return (
-              <div key={x.time} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15em', padding: '0.4em 0.2em', borderRadius: '0.6em', background: ink(style, i === 0 ? 0.1 : 0.05) }}>
-                <div style={{ fontSize: '0.7em', opacity: 0.6, whiteSpace: 'nowrap' }}>{i === 0 ? 'Now' : hourLabel(d)}</div>
-                <Icon d={wxIcon((x.icon ?? '') + ' ' + (x.description ?? ''), h < 6 || h >= 20)} size="1.4em" stroke={1.6} style={{ opacity: 0.85 }} />
-                <div style={{ fontSize: '1em', fontWeight: 500 }}>{Math.round(x.temp)}{deg}</div>
-                <div style={{ fontSize: '0.62em', color: '#60a5fa', minHeight: '1.2em' }}>{p}</div>
-              </div>
-            );
-          })}
-        </div>
-      </>}
+      {hrs.length > 0 && <HourStrip hrs={hrs} tz={tz} hourOf={hourOf} hourLabel={hourLabel} deg={deg} accent={accent} style={style} caps={caps} />}
 
       {days.length > 0 && <>
         <div style={caps}>Next {days.length} days</div>
@@ -93,5 +78,56 @@ export function WeatherPopup({ hourly, forecast, now, tz, tf, deg, accent, style
         </div>
       </>}
     </div>
+  );
+}
+
+/** One row across the next 24 hours, every 3 hours, left to right like a clock: time, sky, a temperature line, rain chance.
+ *  A small day name marks where midnight falls so it's clear which hours are tomorrow. */
+function HourStrip({ hrs, tz, hourOf, hourLabel, deg, accent, style, caps }: {
+  hrs: Hour[]; tz?: string; hourOf: (d: Date) => number; hourLabel: (d: Date) => string; deg: string; accent: string; style: any; caps: React.CSSProperties;
+}) {
+  const pts = hrs.filter((_, i) => i % 3 === 0).slice(0, 8);
+  const n = pts.length;
+  const temps = pts.map((x) => Math.round(x.temp));
+  const tmin = Math.min(...temps); const tr = Math.max(1, Math.max(...temps) - tmin);
+  const X = (i: number) => ((i + 0.5) / n) * 100;
+  const Y = (t: number) => 85 - ((t - tmin) / tr) * 45; // % from top of the line box
+  const wk = (d: Date) => new Intl.DateTimeFormat(undefined, { weekday: 'short', timeZone: tz }).format(d);
+  const col: React.CSSProperties = { display: 'grid', gridTemplateColumns: `repeat(${n}, 1fr)`, textAlign: 'center' };
+  return (
+    <>
+      <div style={caps}>Next 24 hours</div>
+      <div style={{ borderRadius: '0.8em', background: ink(style, 0.05), padding: '0.7em 0.2em 0.6em', marginBottom: '1em' }}>
+        <div style={col}>
+          {pts.map((x, i) => {
+            const d = new Date(x.time); const prev = i > 0 ? new Date(pts[i - 1].time) : null;
+            const newDay = prev && hourOf(d) < hourOf(prev);
+            return (
+              <div key={x.time} style={{ borderLeft: newDay ? `1px dashed ${ink(style, 0.25)}` : '1px solid transparent' }}>
+                <div style={{ fontSize: '0.72em', fontWeight: i === 0 ? 600 : 400, opacity: i === 0 ? 0.95 : 0.65, whiteSpace: 'nowrap' }}>{i === 0 ? 'Now' : hourLabel(d)}</div>
+                <div style={{ fontSize: '0.55em', opacity: 0.5, minHeight: '1.3em', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{newDay ? wk(d) : ''}</div>
+                <div style={{ display: 'flex', justifyContent: 'center' }}><Icon d={wxIcon((x.icon ?? '') + ' ' + (x.description ?? ''), hourOf(d) < 6 || hourOf(d) >= 20)} size="1.5em" stroke={1.6} style={{ opacity: 0.85 }} /></div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ position: 'relative', height: '3.4em', margin: '0.8em 0 0.2em' }}>
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' }}>
+            <polyline points={pts.map((x, i) => `${X(i)},${Y(temps[i])}`).join(' ')} fill="none" stroke={accent} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+          </svg>
+          {pts.map((x, i) => (
+            <React.Fragment key={x.time}>
+              <div style={{ position: 'absolute', left: `${X(i)}%`, top: `${Y(temps[i])}%`, width: '0.5em', height: '0.5em', borderRadius: '50%', background: accent, transform: 'translate(-50%,-50%)' }} />
+              <div style={{ position: 'absolute', left: `${X(i)}%`, top: `${Y(temps[i])}%`, transform: 'translate(-50%,-135%)', fontWeight: 600, whiteSpace: 'nowrap' }}>{temps[i]}{deg}</div>
+            </React.Fragment>
+          ))}
+        </div>
+        <div style={col}>
+          {pts.map((x) => { const p = pct(x.precipProbability); return (
+            <div key={x.time} style={{ fontSize: '0.65em', color: '#60a5fa', minHeight: '1.3em' }}>{p ? `💧${p}` : ''}</div>
+          ); })}
+        </div>
+      </div>
+    </>
   );
 }
